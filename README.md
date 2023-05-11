@@ -1,1 +1,1355 @@
-# MB5370-Module-04
+# MB5370-Module-04 Workbook
+
+---
+title: "MB5370-Module-04-Report"
+author: "Mathilda Bates"
+date: "2023-05-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **MB5370 Module 04 - Data Science**
+
+### Install & Load Packages
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+# WORKSHOP 1 - 2.0 Data Viz in R
+Have a look at the default data provides by ggplot function.
+```{r}
+mpg     # car data
+```
+
+## 2.6 Create your first ggplot
+### Map mpg data in a ggplot
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+Function geom_point() adds a layer of points to your plot, which creates a scatterplot.
+
+### Change point colour by class (ie. compact, SUV, etc.)
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, colour = class))
+```
+
+### Point size by class
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = class))
+```
+Warning message: using size for a discrete variable is not advised --> size indicates scale which is not apporiate for a discrete variable such as class.
+
+### Point transparency by class (ie. alpha)
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, alpha = class))
+```
+Warning message: using alpha for a discrete variable is not advised --> similar to warning message above ^^
+
+### Point shape by class
+```{r}
+gplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+```
+
+### Set properties manually (ie. make all points blue)
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+```
+
+### EXERCISE 1. 
+What happens if you map an aesthetic to something other than a variable name? ie:
+```{r}
+ aes(colour = displ < 5)
+```
+Need to specify X and Y.
+
+## 2.9 Facet and Panel Plots
+Use 'facets' in ggplot to create subplots, and show a specific subset of bigger data.
+
+### Use facet(wrap) to creat these subplots
+** BUT only use facet(wrap) for discrete variables
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+### Use facet(grid) to compare multiple variables
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(drv ~ cyl)
+```
+
+### Use a '.' if you don't want to facet in the rows and columns
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_grid(. ~ cyl)
+```
+
+### EXERCISE 2. 
+What does nrow do? What does ncol do?
+ --> 'nrow' and 'ncol' determine the # of rows and columns, respectively.
+
+## 2.10 Fitting Simple Lines
+### Display data as points
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+### Display data as a smooth line
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+
+### Change line type based on drv value (ie. front wheel, rear wheel, or 4wd)
+```{r}
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+```
+
+### Set group aesthetic to categorical variable
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, group = drv))
+```
+
+### Change colour of line based on drv value
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, color = drv),
+    show.legend = FALSE,
+  )
+```
+
+### Show legend
+```{r}
+ggplot(data = mpg) +
+  geom_smooth(
+    mapping = aes(x = displ, y = hwy, color = drv),
+  )
+```
+
+### Try plotting multiple geoms on a single plot
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+```
+Unable to simply change X variable in plot across all geoms --> need a global mapping to apply changes to EVERY geom() at the same time.
+
+### Try plotting multiple geoms under a global mapping too ggplot() argument
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+```
+Now I can change any variable once in the top line, and it will automatically change within all geoms throughout the rest of the argument.
+
+### Use mappings in specific layers to enable the display of different aesthetics in different layers
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth()
+```
+
+### Specify different data for each layer
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = class)) + 
+  geom_smooth(data = filter(mpg, class == "subcompact"), se = FALSE)
+```
+
+### EXERCISE 3. 
+1. What geom would you use to draw a line chart? A boxplot? A histogram? An area chart?
+ --> I would use geom_abline() to draw a line chart. I would use geom_boxplot() for a boxplot. I would use geom_histogram() for a histogram. I would use geom_area() for an area chart/plot.
+
+2. Run this code in your head and predict what the output will look like. Then, run the code in R and check your predictions.
+ --> I predict that these two plots will look exactly the same. The top one uses the global mapping, while the bottom one specifies individual mapping per geom.
+#### PLOT 1:
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+```
+#### PLOT 2:
+```{r}
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+```
+My predictions were correct.
+
+3. Will these two graphs look different? Why/why not?
+ --> These two graphs don't look different as they display the same thing, just in different expressions of code.
+
+## 2.11 Transformations and Stats
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut))
+```
+Diamonds have a higher count with high quality cuts over low quality cuts.
+
+### Use geoms and stats interchangeably
+```{r}
+ggplot(data = diamonds) + 
+  stat_count(mapping = aes(x = cut))
+```
+Produces the same plot --> every geom has a default stat and every stat has a default geom.
+
+### Override a default stat
+--> change default stat to 'identity'
+```{r}
+demo <- tribble(
+  ~cut,         ~freq,
+  "Fair",       1610,
+  "Good",       4906,
+  "Very Good",  12082,
+  "Premium",    13791,
+  "Ideal",      21551
+)
+demo
+ggplot(data = demo) +
+  geom_bar(mapping = aes(x = cut, y = freq), stat = "identity")
+```
+
+### OR override a default mapping from transformed variables to aesthetics
+--> display a bar chart of proportion of your total diamond dataset rather than a count
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = stat(prop), group = 1))
+```
+
+### Use stat_summary() to show a little more about these transformations in your plot (good practice in transparency)
+```{r}
+ggplot(data = diamonds) + 
+  stat_summary(mapping = aes(x = cut, y = depth),
+    fun.min = min,
+    fun.max = max,
+    fun = median
+  )
+```
+
+### What is the problem with these 2 graphs?
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = after_stat(prop)))
+```
+There's no colour to distinguish any details. Data is not being displayed accurately.
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = after_stat(prop)))
+```
+Colour is now displayed but there is no scale or magnitude of values. Data is therefore still not being displayed accruately.
+
+## 2.12 Position Adjustments
+### Change aspects of bar colours with fill and colour
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, colour = cut))
+```
+Creates colourred halo around bars.
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = cut))
+```
+Fills entire bar with colour.
+
+### Use a different variable (ie. clarity)
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity))
+```
+
+### Position Adjustments allow you to customise your plots in 3 ways: 
+'identity' (raw data), 'fill' (changes heights) and 'dodge' (which forces ggplot2 to not put things on top of each other)
+
+### Position = 'identity'
+Place each object exactly where it falls in the context of the graph. Good for point charts like scatter plots! For other graphs like barplots, need to ALTER the bar aesthetic. ie.
+#### By altering transparency (alpha)
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, fill = clarity)) + 
+  geom_bar(alpha = 1/5, position = "identity")
+```
+
+#### By colouring the bar outlines with no fill colour
+```{r}
+ggplot(data = diamonds, mapping = aes(x = cut, colour = clarity)) + 
+  geom_bar(fill = NA, position = "identity")
+```
+
+### Position = 'fill'
+Works like stacking, but makes each set of stacked bars the same height.
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "fill")
+```
+
+### Position = 'dodge'
+Places overlapping objects directly beside one another.
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = clarity), position = "dodge") 
+```
+Similar plot layout to Nick's example for the Plot Deconstruction homework.
+
+### BONUS Position = 'jitter'
+Slightly moves points so you can see them all (especially when they overlap). Adds a small amount of random noise to each point to avoid overplotting when points overlap. This is useful for scatterplots but not barplots.
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), position = "jitter")
+```
+
+
+# WORKSHOP 2 - 3.0 Using a ggplot2 for communication
+Make plots go from ok to great with added elements of communication!
+
+## 3.1 Labels
+### Start with adding a title --> labs()
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  labs(title = "Fuel efficiency generally decreases with engine size")
+```
+
+### Add a Subtitle and a Caption
+Subtitle helps to add additional detail in a smaller font beneath the title. Caption helps to add text at the bottom right of the plot, often used to describe the source of the data.
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  labs(
+    title = "Fuel efficiency generally decreases with engine size",
+    subtitle = "Two seaters (sports cars) are an exception because of their light weight",
+    caption = "Data from fueleconomy.gov"
+  )
+```
+
+### Replace legend titles and axis labels too
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(colour = class)) +
+  geom_smooth(se = FALSE) +
+  labs(
+    x = "Engine displacement (L)",
+    y = "Highway fuel economy (mpg)",
+    colour = "Car type"
+  )
+```
+
+## 3.2 Annotations 
+### Add text to the plot itself
+```{r}
+best_in_class <- mpg %>%
+  group_by(class) %>%
+  filter(row_number(desc(hwy)) == 1)
+
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(colour = class)) +
+  geom_text(aes(label = model), data = best_in_class)
+```
+Can fix overlapping labels with the nudge() function in the future.
+
+## 3.3 Scales
+### ggplot2 will automatically add scales
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(colour = class))
+```
+
+### Can change this default by offering values to the scale parameters
+Try adding numbers in the appropriate scale arguments.
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(colour = class)) +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_colour_discrete()
+```
+
+## 3.4 Axis Ticks
+### Can use labels as an argument to change the text label associated with ticks
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(15, 40, by = 5))
+```
+
+### OR use labels set to NULL to suppress the labels altogether
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  scale_x_continuous(labels = NULL) +
+  scale_y_continuous(labels = NULL)
+```
+
+## 3.5 Legends and Colour Schemes
+### Change the position of a legend using theme() function
+```{r}
+base <- ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(colour = class))
+base + theme(legend.position = "left")
+base + theme(legend.position = "top")
+base + theme(legend.position = "bottom")
+base + theme(legend.position = "right") # the default --> I prefer this one
+```
+
+### Suppress display of the legend all together
+```{r}
+base + theme(legend.position = "none")
+```
+
+## 3.6 Replacing a scale
+Continuous position scales vs colour scales.
+### Plot transformations of your variable
+ie. log transform to adjust for scale
+```{r}
+ggplot(diamonds, aes(carat, price)) +
+  geom_bin2d() + 
+  scale_x_log10() + 
+  scale_y_log10()
+```
+
+### Customise a colour scale
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = drv))
+
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = drv)) +
+  scale_colour_brewer(palette = "Set1")
+```
+Second plot makes colours more distinct.
+
+### Add redundant shape mapping to account for plot being displayed in black & white
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = drv, shape = drv)) +
+  scale_colour_brewer(palette = "Set1")
+```
+Can use colour brewer scales to create personalised colours @ http://colorbrewer2.org/
+
+### Use predefined colours 
+```{r}
+presidential %>%
+  mutate(id = 33 + row_number()) %>%
+  ggplot(aes(start, id, colour = party)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    scale_colour_manual(values = c(Republican = "red", Democratic = "blue"))
+```
+
+### Try Viridis colour scheme
+```{r}
+install.packages('viridis')
+install.packages('hexbin')
+library(viridis)
+library(hexbin)
+
+df <- tibble( # note we're just making a fake dataset so we can plot it
+  x = rnorm(10000),
+  y = rnorm(10000)
+)
+ggplot(df, aes(x, y)) +
+  geom_hex() + # a new geom! --> hexagonal points
+  coord_fixed()
+
+ggplot(df, aes(x, y)) +
+  geom_hex() +
+  viridis::scale_fill_viridis() +
+  coord_fixed()
+```
+
+## 3.7 Themes
+Customise theme of entire plot --> ggplot2 has 8 default themes.
+### Black and white
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  theme_bw()
+```
+Highlights border of graph in black.
+
+### Light
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  theme_light()
+```
+Makes border lighter.
+
+### Classic
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  theme_classic()
+```
+Removes backdrop of plot.
+
+### Dark
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(se = FALSE) +
+  theme_dark()
+```
+Makes backdrop dark.
+
+### Set all of my arguments to my own curated theme
+```{r}
+theme (panel.border = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.position="right",
+        legend.title=element_blank(),
+        legend.text=element_text(size=8),
+        panel.grid.major = element_blank(),
+        legend.key = element_blank(),
+        legend.background = element_blank(),
+        axis.text.y=element_text(colour="black"),
+        axis.text.x=element_text(colour="black"),
+        text=element_text(family="Calibri")) 
+```
+
+## 3.8 Saving and exporting your plots
+Using ggsave().
+```{r}
+# ggplot(mpg, aes(displ, hwy)) + geom_point() # commented out so knitr will run
+
+# ggsave("my-plot.pdf")
+```
+Saves 7 x 4.32 in image. Use the width and height arguments to change the dimensions of plot. I will not do this as I have used an RMarkdown to export all my ggplots.
+
+
+# WORKSHOP 3 - 4.0 Reproducible work
+## Install GitHub
+```{r}
+install.packages("usethis")
+library(usethis)
+use_git_config(user.name = "mathildabates", user.email = "mathildabates@gmail.com")
+```
+
+# WORKSHOP 4 - 5.0 Data wrangling in R
+## 5.3 What is a tibble?
+Tibbles are slightly adjusted dataframes, designed to keep up with recent advances in R.
+```{r}
+library(tidyverse)
+
+iris # look at iris
+str(iris) # check it out - what type is it? how many rows? --> data.frame. 150 obs of 5 variables
+
+as_tibble(iris) # A tibble: 150 x 5
+```
+Tibbles ALSO allow you to refer to variables that you just created --> this functionality can be super efficient and helpful when building new column values. ie:
+```{r}
+tibble(
+  x = 1:5, 
+  y = 1, 
+  z = x ^ 2 + y) # call new variables to produce new column values! ie. x, y, & z are columns.
+```
+### Escape characters to separate code from labels
+```{r}
+tb <- tibble(
+  `:)` = "smile", 
+  ` ` = "space",
+  `2000` = "number"
+)
+tb
+```
+### Tribbles (transposed tibbles)
+...to help you do data entry directly in your script.
+```{r}
+tribble(
+  ~x, ~y, ~z,
+  #--|--|----
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+```
+Code looks like the table produced by R.
+
+### Differences between data.frames and tibbles
+```{r}
+as_tibble(iris)
+```
+Tibble only shows first 10 rows of data. Makes it less overwhelming when working with large datasets. Also shows TYPE of the variable (helpful when distinguishing format of data).
+```{r}
+tibble(
+  a = lubridate::now() + runif(1e3) * 86400,
+  b = lubridate::today() + runif(1e3) * 30,
+  c = 1:1e3,
+  d = runif(1e3),
+  e = sample(letters, 1e3, replace = TRUE)
+)
+```
+Date-time scheme --> ie. type POSIXct. *Was just working with this in another package (moveVis)!*
+
+### Play around with defaults in tibble
+Can use print() to designate the number of rows (n) and display width. ie:
+```{r}
+install.packages("nycflights13")
+library(nycflights13)
+nycflights13::flights %>% 
+  print(n = 10, width = Inf)
+```
+Clearly describing 10 rows of tibble data, with all columns displayed.
+
+### Set global options for tibble
+```{r}
+options(tibble.width = Inf)
+```
+Will now always see all columns when using tibble.
+
+### Pull out exact cell value using [[,]]
+```{r}
+df <- tibble(
+  x = runif(5),
+  y = rnorm(5)
+)
+
+# Extract by name
+df$x
+df[["x"]]
+
+# Extract by row position
+df[[1]]
+
+# Extract by exact position
+df[[2,2]]
+```
+
+### Use pipes (%>%) to address variables in R
+To use these base R functions we will need to use a "." as a placeholder when using pipes.
+```{r}
+df %>% .$x
+df %>% .[["x"]]
+```
+
+### Tibbles DON'T do partial matching (ie. call outs must match dataframe exactly)
+```{r}
+df <- tibble(
+    xxx = runif(5),
+    y = rnorm(5)
+)
+df$xx
+```
+Tibble generates a warning as "xx" doesn't exist in the dataframe.
+
+**BUT**... tibbles don't always work with older functions in R.
+
+## 5.4 How can I import data?
+### Most important code to read .CSV!
+```{r}
+#heights <- read_csv("data/heights.csv")
+```
+Commented out as heights.csv does not exist in my directory.
+
+### read_csv --> prints out a column specification that gives the name and type of each column
+```{r}
+read_csv("a,b,c
+1,2,3
+4,5,6")
+```
+First line of data (ie. a, b, c) is the column names.
+```{r}
+read_csv("The first line of metadata
+  The second line of metadata
+  x,y,z
+  1,2,3", skip = 2)
+```
+Skips the first 2 lines of data --> x ,y, z are now column names. OR
+```{r}
+read_csv("# A comment I want to skip
+  x,y,z
+  1,2,3", comment = "#")
+```
+Comment out the data you want to skip.
+
+### Use col_names = FALSE 
+To tell read_csv() NOT to treat the first row as headings but to instead label them sequentially from X1 to Xn.
+```{r}
+read_csv("1,2,3\n4,5,6", col_names = FALSE)
+```
+Useful for editing data potentially sourced from elsewhere. "\n" is used as a shortcut for adding a new line --> a common ‘break’ in programming. 
+
+### OR use col_names a character vector to be used as the column name
+```{r}
+read_csv("1,2,3\n4,5,6", col_names = c("x", "y", "z"))
+```
+
+### Set data to no value 
+Rather than 0 in order to not mess up analysis.
+```{r}
+read_csv("a,b,c\n1,2,.", na = ".")
+```
+
+## 5.5 Tidying data using Tidyr
+### 5.5.1 Tidy data
+```{r}
+table1 # tidy
+table2 # ... with 6 more rows
+table3 # spread across two tibbles
+table4a # cases
+table4b # population
+```
+Only table1 is tidy. A 'tidy' dataset has 3 interrelated rules: 
+  1. Each variable must have its own column.
+  2. Each observation must have its own row.
+  3. Each value must have its own cell.
+ie. --> Put each dataset in a tibble & put each variable in a column!
+** Understanding whether your dataframe is tidy is FUNDAMENTAL for being a good data scientist!**
+```{r}
+# Compute rate per 10,000
+table1 %>% 
+  mutate(rate = cases / population * 10000)
+
+# Compute cases per year
+table1 %>% 
+  count(year, wt = cases)
+
+# Visualise changes over time
+library(ggplot2)
+ggplot(table1, aes(year, cases)) + 
+  geom_line(aes(group = country), colour = "grey50") + 
+  geom_point(aes(colour = country))
+```
+
+### 5.5.2 Spreading and gathering data tables
+FIRST step in tidying the data is to understand what each variable and observation actually means. SECOND step is to resolve 1 of the 2 common problems: one variable is spread across multiple columns OR/AND one observation is scattered across multiple rows.
+#### pivot_longer() 
+... used when some of the column names are not names of variables, but values of a variable.
+```{r}
+table4a
+```
+Column names 1999 and 2000 represent values of the year variable, the values in the 1999 and 2000 columns represent values of the cases variable, and each row represents TWO observations, not one. Need to pivot the offending columns into a new pair of variables:
+```{r}
+table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+```
+Can fix table4b too:
+```{r}
+table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+```
+Combine tidied versions of both table4a and table4b into a SINGLE TIBBLE using left_join().
+```{r}
+tidy4a <- table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+tidy4b <- table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+left_join(tidy4a, tidy4b)
+```
+#### pivot_wider()
+... to handle an observation scattered across multiple rows (ie. opposite of pivot_longer())
+```{r}
+table2
+```
+An observation is a country in a year with the observation spread across two rows. Tidy with pivot_wider() by making the table shorter and wider by creating new, separate columns for cases and population and populating them with their associated values.
+```{r}
+table2 %>%
+    pivot_wider(names_from = type, values_from = count)
+```
+
+### 5.5.3 Separating and uniting data tables
+In table3, we see one column (rate) that contains two variables (cases and population). 
+#### Use the separate() function 
+... separates one column into multiple columns wherever you designate
+```{r}
+table3
+```
+Split the rate column up into two variables:
+```{r}
+table3 %>% 
+  separate(rate, into = c("cases", "population"))
+```
+If you wish to use a specific character to separate a column, you can pass the character to the sep argument of separate(). ie:
+```{r}
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep = "/")
+```
+Change separate from addressing columns as characters to numbers.
+```{r}
+table3 %>% 
+  separate(rate, into = c("cases", "population"), convert = TRUE)
+```
+Pass a vector of integers to sep. separate() will interpret the integers as positions to split. ie. use this arrangement to separate the last two digits of each year
+```{r}
+table3 %>% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+
+#### Use unite() as the inverse of separate()
+... to combine multiple columns into a single column. Takes a data frame, the name of the new variable and a set of columns to combine using dplyr::select()
+```{r}
+table5 %>% 
+  unite(new, century, year, sep = "")
+```
+Added sep ="" because we didn’t want any separator (the default is to add an underscore _).
+
+### 5.5.4 Handling missing values
+Missing values are sometimes populated with NA or sometimes they could be simply missing altogether from the data (i.e. a blank cell).
+```{r}
+stocks <- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+)
+```
+ie. return for the 4th quarter of 2015 is missing as NA while the return for the 1st quarter of 2016 is missing because it is simply absent. *An NA (explicit absence) indicates the presence of absent data, and a blank cell just indicates the absence of data (implicit absence).*
+#### Make implicit missing value explicit by putting years in the columns
+```{r}
+stocks %>% 
+  pivot_wider(names_from = year, values_from = return)
+```
+Can set values_drop_na = TRUE in pivot_longer() to turn explicit missing values implicit --> makes those missing values that are probably not supposed to be missing now a valid row of data in your data frame. ie:
+```{r}
+stocks %>% 
+  pivot_wider(names_from = year, values_from = return) %>% 
+  pivot_longer(
+    cols = c(`2015`, `2016`), 
+    names_to = "year", 
+    values_to = "return", 
+    values_drop_na = TRUE
+  )
+```
+#### Use complete() to make missing values explicit
+... takes a set of columns and finds all the unique combinations and then ensures the original dataset contains all of those values, including filling in explicit NA where needed
+```{r}
+stocks
+stocks %>% 
+  complete(year, qtr)
+```
+
+#### Use fill() to fill in missing values that were meant to be carried forward in the data entry process
+... take columns with missing values and carry the last observation forward (replace them with the most recent non-missing value)
+```{r}
+treatment <- tribble(
+  ~ person,           ~ treatment, ~response,
+  "Derrick Whitmore", 1,           7,
+  NA,                 2,           10,
+  NA,                 3,           9,
+  "Katherine Burke",  1,           4
+)
+treatment
+
+treatment %>% 
+  fill(person)
+```
+
+## 5.6 Learning relational data
+Relational data is a collection of multiple data tables in a given dataset or in a project that are related in some ways. The relations BETWEEN these tables matter, not just the individual tables, and will even be a key source of the insights you might be able to deliver.
+### Package dplyr... for data manipulation/analysis
+dplyr provides the following verbs to make common data analysis operations easier:
+  1. Mutating joins - add new variables to one dataframe from matching observations in another
+  2. Filtering joins - filter observations from one data frame based on whether or not they match an observation in the other table
+  3. Set operations - treat observations as if they are set elements
+```{r}
+library(tidyverse)
+library(nycflights13)
+
+airlines
+```
+'airlines' lets you look up full carrier name from abbreviated code.
+```{r}
+airports
+```
+'airports' gives information about each airport, identified by the faa airport code.
+```{r}
+planes
+```
+'planes' gives information about each plane, identified by its tail number.
+```{r}
+weather
+```
+'weather' gives the weather at each NYC airport for each hour.
+* 'flights' connects to 'planes' via a single variable, 'tailnum' // 'flights' connects to 'airlines' through the carrier 'variable' // 'flights' connects to 'airports' in two ways: via 'origin' and 'dest' variables // 'flights' connects to 'weather' via 'origin' (the location), and 'year', 'month', 'day' and 'hour' (the time).
+
+### 5.6.1 Joining datasets
+Keys join together datasets. A key is a variable (or set of variables) that uniquely identifies an observation. A PRIMARY key uniquely identifies an observation in its own table while a FOREIGN key uniquely identifies an observation in another table.
+```{r}
+planes %>% 
+  count(tailnum) %>% 
+  filter(n > 1)
+
+weather %>% 
+  count(year, month, day, hour, origin) %>% 
+  filter(n > 1)
+```
+Sometimes a table doesn’t have an explicit primary key: each row is an observation, but no combination of variables reliably identifies it. ie:
+```{r}
+flights %>% 
+  count(year, month, day, flight) %>% 
+  filter(n > 1)
+
+flights %>% 
+  count(year, month, day, tailnum) %>% 
+  filter(n > 1)
+```
+If a table lacks a primary key, it’s sometimes useful to add one with mutate() and row_number(). That makes it easier to match observations if you’ve done some filtering and want to check back in with the original data. This is called a SURROGATE key.
+
+### 5.6.2 Mutating Joins
+A mutating join allows you to combine variables from two tables. It first matches observations by their keys, then copies across variables from one table to the other.
+```{r}
+#set global options for tibble
+options(tibble.width = Inf)
+
+#set narrower subset of data
+flights2 <- flights %>% 
+  select(year:day, hour, origin, dest, tailnum, carrier)
+
+#use mutating function
+flights2 %>%
+  select(-origin, -dest) %>% 
+  left_join(airlines, by = "carrier")
+```
+Mutate function is a little messier --> ie:
+```{r}
+flights2 %>%
+  select(-origin, -dest) %>% 
+  mutate(name = airlines$name[match(carrier, airlines$carrier)])
+```
+Prefer to use mutate join.
+#### Conceptualise joins
+```{r}
+x <- tribble(
+  ~key, ~val_x,
+     1, "x1",
+     2, "x2",
+     3, "x3"
+)
+y <- tribble(
+  ~key, ~val_y,
+     1, "y1",
+     2, "y2",
+     4, "y3"
+)
+```
+
+#### Inner join ... simplest join as it matches observations with equivalent keys
+The most important property of an inner join is that unmatched rows are not included in the result. *This means that generally inner joins are usually not appropriate for use in analysis because it’s too easy to lose observations!*
+```{r}
+x %>% 
+  inner_join(y, by = "key")
+```
+#### Outer join ... keeps observations that appear in at least one of the tables
+3 types of outer joins:
+  1. left_join() keeps all observations in x (we’ve seen this in our first example)
+  2. right_join() keeps all observations in y
+  3. full_join() keeps all observations in x and y
+*The left join should be your default join, because it preserves the original observations even when there isn’t a match.*
+
+#### One table has duplicate keys
+... useful when you want to add in additional information as there is typically a one-to-many relationship.
+```{r}
+x <- tribble(
+  ~key, ~val_x,
+     1, "x1",
+     2, "x2",
+     2, "x3",
+     1, "x4"
+)
+y <- tribble(
+  ~key, ~val_y,
+     1, "y1",
+     2, "y2"
+)
+left_join(x, y, by = "key")
+```
+#### Both tables have duplicate keys
+... usually an error because in neither table do the keys uniquely identify an observation
+```{r}
+x <- tribble(
+  ~key, ~val_x,
+     1, "x1",
+     2, "x2",
+     2, "x3",
+     3, "x4"
+)
+y <- tribble(
+  ~key, ~val_y,
+     1, "y1",
+     2, "y2",
+     2, "y3",
+     3, "y4"
+)
+left_join(x, y, by = "key")
+```
+#### Natural join... uses all variables that appear in both tables
+```{r}
+flights2 %>% 
+  left_join(weather)
+```
+#### Add character vector ie. by = "x"
+This is like a natural join, but uses only some of the common variables.
+```{r}
+flights2 %>% 
+  left_join(planes, by = "tailnum")
+```
+#### Add a named character vector ie. by = c("a" = "b")
+This will match variable a in table x to variable b in table y. The variables from x will be used in the output. --> useful for spatial analysis in R (ie. latitude and longitudes!)
+```{r}
+flights2 %>% 
+  left_join(airports, c("dest" = "faa"))
+
+flights2 %>% 
+  left_join(airports, c("origin" = "faa"))
+```
+
+### 5.6.3 Filtering Joins
+Filtering joins also match observations but they affect the observations themselves rather than the variables like we saw from mutating joins
+#### Semi_join keeps all observations in x that have a match in y.
+... useful for matching filtered summary tables back to the original rows
+```{r}
+# 10 most popular destinations
+top_dest <- flights %>%
+  count(dest, sort = TRUE) %>%
+  head(10)
+top_dest
+
+# find each flight that went to one of those destinations
+flights %>% 
+  filter(dest %in% top_dest$dest)
+```
+Now use semi_join to extend to multiple variables. ie. connects the two tables like a mutating join, but instead of adding new columns, only keeps the rows in x that have a match in y.
+```{r}
+flights %>% 
+  semi_join(top_dest)
+```
+
+#### Anti_join drops all the observations in x that have a match in y
+... inverse of semi_joins in that they keep rows without matches. They are great for diagnosing mismatches in a dataset.
+```{r}
+# what flights don't have a match in planes
+flights %>%
+  anti_join(planes, by = "tailnum") %>%
+  count(tailnum, sort = TRUE)
+```
+
+## 5.7 Pipes for more readable workflows
+```{r}
+library(magrittr)
+```
+
+### Explore pipes through kid's nursery rhyme
+```{r}
+library(magrittr)
+foo_foo <- little_bunny()
+```
+
+#### 1. Saving each step as a new object
+```{r}
+foo_foo_1 <- hop(foo_foo, through = forest)
+foo_foo_2 <- scoop(foo_foo_1, up = field_mice)
+foo_foo_3 <- bop(foo_foo_2, on = head)
+```
+
+#### 2. Overwrite the original object instead of creating intermediate objects at each step
+```{r}
+foo_foo <- hop(foo_foo, through = forest)
+foo_foo <- scoop(foo_foo, up = field_mice)
+foo_foo <- bop(foo_foo, on = head)
+```
+
+#### 3. String the function calls together
+```{r}
+bop(
+  scoop(
+    hop(foo_foo, through = forest),
+    up = field_mice
+  ), 
+  on = head
+)
+```
+
+#### Use a pipe!
+```{r}
+foo_foo %>%
+  hop(through = forest) %>%
+  scoop(up = field_mice) %>%
+  bop(on = head)
+
+# magrittr basically creates this
+my_pipe <- function(.) {
+  . <- hop(., through = forest)
+  . <- scoop(., up = field_mice)
+  bop(., on = head)
+}
+my_pipe(foo_foo)
+```
+Won't work for 2 classes of functions. ie. Functions that use the current environment & functions that use lazy evaluation.
+
+
+# WORKSHOP 5 - 6.0 Spatial data in R
+## 6.4 Installing the spatial R packages
+```{r}
+# install and load your packages
+install.packages("sf") 
+install.packages("terra")
+install.packages("tmap")
+
+
+#load into R library
+library(tidyverse)
+library(sf) # simple features
+library (terra) # for raster
+library(tmap) # Thematic maps are geographical maps in which spatial data distributions are visualized
+```
+## 6.6 Loading the spatial dataset
+### Load the copepod data into R studio
+```{r}
+library(readr)
+dat <- read_csv("data/copepods_raw.csv")
+dat
+```
+The silk_id column (ie. just the ID for each of the silks) onto which plankton are recorded.
+
+## 6.7 Data exploration
+### 6.7.1 Check coordinates
+... by plotting the coordinates for the samples (segments of the CPR silks).
+```{r}
+library(ggplot2)
+ggplot(dat) + 
+  aes(x = longitude, y = latitude, color = richness_raw) +
+  geom_point()
+```
+Showing the location of every segment and color the points by species richness.
+
+#### Now look at the richness data (our main variable for analysis)
+```{r}
+ggplot(dat, aes(x = latitude, y = richness_raw)) + 
+  stat_smooth() + 
+  geom_point()
+```
+*unnatural change in the data pattern at about latitude -40*
+
+## 6.8 Getting going with maps
+### Turn data into a ‘simple features collection’
+*st_as_sf converts different data types to simple features & crs = coordinate reference system*
+```{r}
+sdat <- st_as_sf(dat, coords = c("longitude", "latitude"), 
+                 crs = 4326)
+```
+
+## 6.9 Coordinate reference systems
+```{r}
+crs4326 <- st_crs(4326)
+crs4326 # look at the whole CRS
+crs4326$Name # pull out just the name of the crs
+```
+### What does the WKT look like
+```{r}
+crs4326$wkt # crs in well-known text format
+```
+
+## 6.10 Feature collection (points)
+### What did we create with sdat
+```{r}
+sdat
+```
+sdat looks just like dat did, but with a geometry column --> where the coordinates (just one point for each data row) are stored. More complex simple features could have a series of points, lines, polygons or other types of shapes nested in each row of the geometry column. *A simple feature is like a shapefile, in that it holds a lot of data in columns and rows but is spatially aware.*
+
+## 6.11 Cartography
+```{r}
+plot(sdat["richness_raw"])
+```
+If we used plot(sdat) it would create a panel for every variable in our dataframe. In sf, we can use square brackets ["richness_raw"] to select a single variable.
+
+## 6.12 Thematic maps for communication
+... tmap. tmap works similarly to ggplot2 in that you build and add on layers.
+```{r}
+#using tmap
+
+tm1 <- tm_shape(sdat) + 
+  tm_dots(col = "richness_raw")
+tm1
+```
+### Save map to working directory
+```{r}
+tmap_save(tm1, filename = "Richness-map.png", 
+          width = 600, height = 600)
+```
+
+## 6.13 Mapping spatial polygons as layers
+### 6.13.1 Loading shapefiles
+```{r}
+# Aussie layer
+aus <- st_read("data/spatial-data/Aussie/Aussie.shp")
+aus
+
+# Aus_Shelf layer
+shelf <- st_read("data/spatial-data/aus_shelf/aus_shelf.shp")
+shelf
+```
+### 6.13.2 Mapping your polygons
+#### Make a map of polygons with tmap
+```{r}
+tm_shape(shelf) + 
+  tm_polygons()
+```
+Next, indicate the shape of the map (shelf) and add the command bbox = sdat to expand the extent of the map so it depicts all of the copepod data points. Then add the shape of Australia (aus) on top of the shelf, and finally the copepod data (sdat) in the form of points using tm_dots().
+```{r}
+tm_shape(shelf, bbox = sdat) + 
+  tm_polygons() +
+  tm_shape(aus) + 
+  tm_polygons() + 
+  tm_shape(sdat) + 
+  tm_dots()
+```
+
+## 6.14 Exploring t_map with vignette
+```{r}
+vignette('tmap-getstarted')
+```
+
+### Create a map of the world
+```{r}
+library(tmap)
+data("World")
+
+tm_shape(World) +
+    tm_polygons("HPI")
+```
+
+### Interactive maps
+```{r}
+tmap_mode("view")
+
+tm_shape(World) +
+    tm_polygons("HPI")
+```
+
+### Multiple shapes and layers
+```{r}
+data(World, metro, rivers, land)
+
+tmap_mode("plot")
+
+tm_shape(land) +
+    tm_raster("elevation", palette = terrain.colors(10)) +
+tm_shape(World) +
+    tm_borders("white", lwd = .5) +
+    tm_text("iso_a3", size = "AREA") +
+tm_shape(metro) +
+    tm_symbols(col = "red", size = "pop2020", scale = .5) +
+tm_legend(show = FALSE)
+```
+
+### Facets
+#### 1. Assign mutliple variable names to 1 aesthetic
+```{r}
+tmap_mode("view")
+tm_shape(World) +
+    tm_polygons(c("HPI", "economy")) +
+    tm_facets(sync = TRUE, ncol = 2)
+```
+#### 2. Split spatial data with the by argument
+```{r}
+tmap_mode("plot")
+
+data(NLD_muni)
+
+NLD_muni$perc_men <- NLD_muni$pop_men / NLD_muni$population * 100
+
+tm_shape(NLD_muni) +
+    tm_polygons("perc_men", palette = "RdYlBu") +
+    tm_facets(by = "province")
+```
+#### 3. By using tmap_arrange function
+```{r}
+tmap_mode("plot")
+
+data(NLD_muni)
+tm1 <- tm_shape(NLD_muni) + tm_polygons("population", convert2density = TRUE)
+tm2 <- tm_shape(NLD_muni) + tm_bubbles(size = "population")
+
+tmap_arrange(tm1, tm2)
+```
+
+### Basemaps and overlay tile maps
+```{r}
+tmap_mode("view")
+tm_basemap("Stamen.Watercolor") +
+tm_shape(metro) + tm_bubbles(size = "pop2020", col = "red") +
+tm_tiles("Stamen.TonerLabels")
+```
+
+### Options and styles
+```{r}
+tmap_mode("plot")
+
+tm_shape(World) +
+    tm_polygons("HPI") +
+tm_layout(bg.color = "skyblue", inner.margins = c(0, .02, .02, .02))
+```
+#### Options can be set globally too.
+```{r}
+tmap_options(bg.color = "black", legend.text.color = "white")
+
+tm_shape(World) +
+    tm_polygons("HPI", legend.title = "Happy Planet Index")
+```
+#### Style is certain configuration of tmap options
+```{r}
+tmap_style("classic")
+
+tm_shape(World) +
+    tm_polygons("HPI", legend.title = "Happy Planet Index")
+```
+tmap_style set to classic but other options are: "white", "gray", "natural", "cobalt", "col_blind", "albatross", "beaver", "bw", "watercolor".
+```{r}
+# see what options have been changed
+tmap_options_diff()
+
+# reset the options to the default values
+tmap_options_reset()
+```
+
+### Exporting maps
+```{r}
+tm <- tm_shape(World) +
+    tm_polygons("HPI", legend.title = "Happy Planet Index")
+
+## save an image ("plot" mode)
+tmap_save(tm, filename = "world_map.png")
+
+## save as stand-alone HTML file ("view" mode)
+tmap_save(tm, filename = "world_map.html")
+```
+
+### Shiny intergration (*need to install shiny package first*)
+```{r}
+# in UI part:
+tmapOutput("my_tmap")
+
+# in server part
+output$my_tmap = renderTmap({
+    tm_shape(World) + tm_polygons("HPI", legend.title = "Happy Planet Index")
+})
+```
+
+### Quick thematic map
+Made with one function call ie:
+```{r}
+qtm(World, fill = "HPI", fill.pallete = "RdYlGn")
+```
+
+
